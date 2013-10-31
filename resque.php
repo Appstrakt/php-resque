@@ -8,8 +8,12 @@ require_once 'lib/Resque.php';
 require_once 'lib/Resque/Worker.php';
 
 $REDIS_BACKEND = getenv('REDIS_BACKEND');
+$REDIS_BACKEND_DB = getenv('REDIS_BACKEND_DB');
 if(!empty($REDIS_BACKEND)) {
-	Resque::setBackend($REDIS_BACKEND);
+    if (empty($REDIS_BACKEND_DB))
+        Resque::setBackend($REDIS_BACKEND);
+    else
+        Resque::setBackend($REDIS_BACKEND, $REDIS_BACKEND_DB);
 }
 
 $logLevel = 0;
@@ -66,7 +70,7 @@ else {
 	$queues = explode(',', $QUEUE);
 	$worker = new Resque_Worker($queues);
 	$worker->logLevel = $logLevel;
-	
+
 	$PIDFILE = getenv('PIDFILE');
 	if ($PIDFILE) {
 		file_put_contents($PIDFILE, getmypid()) or
